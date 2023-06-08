@@ -1,4 +1,4 @@
-package br.com.connect.model.transport;
+package br.com.connect.model.transport.user;
 
 import br.com.connect.model.User;
 

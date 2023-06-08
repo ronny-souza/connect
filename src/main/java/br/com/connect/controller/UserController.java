@@ -1,7 +1,9 @@
 package br.com.connect.controller;
 
-import br.com.connect.model.transport.CreateUserDTO;
-import br.com.connect.model.transport.UserDTO;
+import br.com.connect.model.transport.user.ConfirmAccountDTO;
+import br.com.connect.model.transport.user.CreateUserDTO;
+import br.com.connect.model.transport.user.UserDTO;
+import br.com.connect.service.AccountConfirmationService;
 import br.com.connect.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +18,7 @@ import java.net.URI;
 @RequestMapping("/user")
 public class UserController {
 
-    private UserService userService;
+    private final UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -25,6 +27,12 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserDTO> register(@RequestBody @Valid CreateUserDTO createUserDTO) {
         UserDTO response = this.userService.register(createUserDTO);
-        return ResponseEntity.created(URI.create("/user")).build();
+        return ResponseEntity.created(URI.create("/user")).body(response);
+    }
+
+    @PostMapping("/confirm")
+    public ResponseEntity<Void> confirmAccount(@RequestBody @Valid ConfirmAccountDTO confirmAccountDTO) {
+        this.userService.confirmAccount(confirmAccountDTO);
+        return ResponseEntity.ok().build();
     }
 }

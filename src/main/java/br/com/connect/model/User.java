@@ -1,6 +1,6 @@
 package br.com.connect.model;
 
-import br.com.connect.model.transport.CreateUserDTO;
+import br.com.connect.model.transport.user.CreateUserDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -52,6 +52,10 @@ public class User implements UserDetails {
         this.phone = createUserDTO.phone();
         this.password = passwordEncoded;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public void enable() {
+        this.enabled = true;
     }
 
     @Override

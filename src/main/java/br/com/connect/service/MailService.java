@@ -2,7 +2,7 @@ package br.com.connect.service;
 
 import br.com.connect.configuration.rabbitmq.RabbitQueues;
 import br.com.connect.model.enums.MailTypeEnum;
-import br.com.connect.model.transport.MailDTO;
+import br.com.connect.model.transport.mail.MailDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,7 @@
 package br.com.connect.controller;
 
 import br.com.connect.database.DatabaseContainerConfiguration;
-import br.com.connect.model.transport.CreateUserDTO;
+import br.com.connect.model.transport.user.CreateUserDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.BeforeAll;

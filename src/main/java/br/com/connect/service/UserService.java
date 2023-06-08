@@ -1,11 +1,11 @@
 package br.com.connect.service;
 
 import br.com.connect.exception.UserAlreadyExistsException;
-import br.com.connect.factory.RandomFactory;
 import br.com.connect.model.User;
 import br.com.connect.model.enums.MailTypeEnum;
-import br.com.connect.model.transport.CreateUserDTO;
-import br.com.connect.model.transport.UserDTO;
+import br.com.connect.model.transport.user.ConfirmAccountDTO;
+import br.com.connect.model.transport.user.CreateUserDTO;
+import br.com.connect.model.transport.user.UserDTO;
 import br.com.connect.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +30,13 @@ public class UserService implements UserDetailsService {
 
     private final MailService mailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, MailService mailService) {
+    private final AccountConfirmationService accountConfirmationService;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, MailService mailService, AccountConfirmationService accountConfirmationService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.mailService = mailService;
+        this.accountConfirmationService = accountConfirmationService;
     }
 
     @Override
@@ -49,24 +52,31 @@ public class UserService implements UserDetailsService {
         }
 
         String passwordEncoded = this.passwordEncoder.encode(createUserDTO.password());
-        User newUser = new User(createUserDTO, passwordEncoded);
-        this.userRepository.save(newUser);
+        User createdUser = this.userRepository.save(new User(createUserDTO, passwordEncoded));
         LOGGER.info("User registered, sending confirmation account email...");
 
-        UserDTO userDTO = new UserDTO(newUser);
-        this.publishConfirmationAccountMessage(userDTO);
-        return userDTO;
+        this.publishConfirmationAccountMessage(createdUser);
+        return new UserDTO(createdUser);
     }
 
-    private void publishConfirmationAccountMessage(UserDTO userDTO) {
+    private void publishConfirmationAccountMessage(User user) {
         String subject = "Connect - Confirmação de conta";
         MailTypeEnum type = MailTypeEnum.CONFIRM_ACCOUNT;
 
-        String code = RandomFactory.instance().code();
+        String code = this.accountConfirmationService.createConfirmationCode(user);
 
         Map<String, Object> properties = new HashMap<>();
-        properties.put("username", userDTO.name());
+        properties.put("username", user.getName());
         properties.put("code", code);
-        this.mailService.buildAndpublish(null, userDTO.email(), subject, type, properties);
+        this.mailService.buildAndpublish(null, user.getEmail(), subject, type, properties);
+    }
+
+    @Transactional
+    public void confirmAccount(ConfirmAccountDTO confirmAccountDTO) {
+        this.accountConfirmationService.confirmAccount(confirmAccountDTO);
+
+        User user = this.userRepository.findByEmail(confirmAccountDTO.email());
+        user.enable();
+        this.userRepository.save(user);
     }
 }
