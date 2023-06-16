@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: ${DB_DRIVER:org.mariadb.jdbc.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: ${DB_DDL:update}
+    properties:
+      hibernate:
+        dialect: ${DB_DIALECT:org.hibernate.dialect.MySQLDialect}
+        dialect.storage_engine: innodb
+      jakarta:
+        persistence:
+          validation:
+            mode: none

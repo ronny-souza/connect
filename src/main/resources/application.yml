@@ -1,0 +1,26 @@
+server:
+  servlet:
+    context-path: /connect
+
+spring:
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+  datasource:
+    url: ${DB_URL:jdbc:mariadb://localhost:3306/connect?useTimezone=true&serverTimezone=UTC&CreateDatabaseIfNotExist=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: ${DB_DRIVER:org.mariadb.jdbc.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: ${DB_DDL:update}
+    properties:
+      hibernate:
+        dialect: ${DB_DIALECT:org.hibernate.dialect.MySQLDialect}
+        dialect.storage_engine: innodb
+      jakarta:
+        persistence:
+          validation:
+            mode: none
