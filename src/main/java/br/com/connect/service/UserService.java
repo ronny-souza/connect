@@ -46,6 +46,10 @@ public class UserService implements UserDetailsService {
         return this.userRepository.findByEmail(email);
     }
 
+    public User findByEmail(String email) throws UserNotFoundException {
+        return this.userRepository.findByEmailAndEnabledTrue(email).orElseThrow(() -> new UserNotFoundException(String.format("User with given e-mail was not found: %s", email)));
+    }
+
     @Transactional
     public UserDTO register(CreateUserDTO createUserDTO) {
         LOGGER.info("Starting user registration...");
@@ -61,7 +65,7 @@ public class UserService implements UserDetailsService {
         return new UserDTO(createdUser);
     }
 
-    public void regenerateConfirmationCode(String email) {
+    public void regenerateConfirmationCode(String email) throws UserNotFoundException {
         User user = this.userRepository.findByEmail(email);
         if (user == null) {
             throw new UserNotFoundException("No user registered with this email was found");
@@ -76,7 +80,7 @@ public class UserService implements UserDetailsService {
         String subject = "Connect - Confirmação de conta";
         MailTypeEnum type = MailTypeEnum.CONFIRM_ACCOUNT;
 
-        String code = this.accountConfirmationService.createConfirmationCode(user);
+        String code = this.accountConfirmationService.createConfirmationCode(null, user);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("username", user.getName());

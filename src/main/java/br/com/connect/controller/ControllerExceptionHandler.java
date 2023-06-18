@@ -2,6 +2,7 @@ package br.com.connect.controller;
 
 import br.com.connect.exception.ConfirmationCodeExpiredException;
 import br.com.connect.exception.ConfirmationCodeNotFoundException;
+import br.com.connect.exception.UnauthenticatedUserException;
 import br.com.connect.exception.UserAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,5 +25,10 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(ConfirmationCodeExpiredException.class)
     public ResponseEntity<String> handleConfirmationCodeExpiredException(ConfirmationCodeExpiredException ex) {
         return ResponseEntity.status(HttpStatus.GONE).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(UnauthenticatedUserException.class)
+    public ResponseEntity<String> handleUnauthenticatedUserException(UnauthenticatedUserException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
 }

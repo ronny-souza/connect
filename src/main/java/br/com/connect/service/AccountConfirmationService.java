@@ -26,8 +26,8 @@ public class AccountConfirmationService {
     }
 
     @Transactional
-    public String createConfirmationCode(User user) {
-        AccountConfirmation accountConfirmation = new AccountConfirmation(user);
+    public String createConfirmationCode(String email, User user) {
+        AccountConfirmation accountConfirmation = new AccountConfirmation(email, user);
         this.accountConfirmationRepository.save(accountConfirmation);
         return accountConfirmation.getCode();
     }

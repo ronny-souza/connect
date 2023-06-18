@@ -1,6 +1,7 @@
 package br.com.connect.controller;
 
 import br.com.connect.exception.ConfirmationCodeExpiredException;
+import br.com.connect.exception.UserNotFoundException;
 import br.com.connect.model.transport.user.ConfirmAccountDTO;
 import br.com.connect.model.transport.user.CreateUserDTO;
 import br.com.connect.model.transport.user.UserDTO;
@@ -38,7 +39,7 @@ public class UserController {
     }
 
     @PostMapping("/confirmation/resend")
-    public ResponseEntity<Void> resendConfirmationCode(@RequestBody String email) {
+    public ResponseEntity<Void> resendConfirmationCode(@RequestBody String email) throws UserNotFoundException {
         this.userService.regenerateConfirmationCode(email);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
