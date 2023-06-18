@@ -1,7 +1,6 @@
 package br.com.connect.model;
 
 import br.com.connect.model.transport.user.CreateUserDTO;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -43,6 +42,7 @@ public class User implements UserDetails {
     @Column(nullable = false, columnDefinition = "tinyint DEFAULT 0")
     private boolean enabled;
 
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     public User(CreateUserDTO createUserDTO, String passwordEncoded) {

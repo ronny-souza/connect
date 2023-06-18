@@ -1,6 +1,8 @@
 package br.com.connect.service;
 
+import br.com.connect.exception.ConfirmationCodeExpiredException;
 import br.com.connect.exception.UserAlreadyExistsException;
+import br.com.connect.exception.UserNotFoundException;
 import br.com.connect.model.User;
 import br.com.connect.model.enums.MailTypeEnum;
 import br.com.connect.model.transport.user.ConfirmAccountDTO;
@@ -59,6 +61,17 @@ public class UserService implements UserDetailsService {
         return new UserDTO(createdUser);
     }
 
+    public void regenerateConfirmationCode(String email) {
+        User user = this.userRepository.findByEmail(email);
+        if (user == null) {
+            throw new UserNotFoundException("No user registered with this email was found");
+        }
+
+        this.accountConfirmationService.deleteCodeIfExists(email);
+        LOGGER.info("Generating new confirmation code...");
+        this.publishConfirmationAccountMessage(user);
+    }
+
     private void publishConfirmationAccountMessage(User user) {
         String subject = "Connect - Confirmação de conta";
         MailTypeEnum type = MailTypeEnum.CONFIRM_ACCOUNT;
@@ -72,7 +85,7 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void confirmAccount(ConfirmAccountDTO confirmAccountDTO) {
+    public void confirmAccount(ConfirmAccountDTO confirmAccountDTO) throws ConfirmationCodeExpiredException {
         this.accountConfirmationService.confirmAccount(confirmAccountDTO);
 
         User user = this.userRepository.findByEmail(confirmAccountDTO.email());

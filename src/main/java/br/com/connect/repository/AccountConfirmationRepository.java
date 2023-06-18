@@ -11,4 +11,5 @@ public interface AccountConfirmationRepository extends JpaRepository<AccountConf
 
     Optional<AccountConfirmation> findByCodeAndUserEmail(String code, String email);
 
+    Optional<AccountConfirmation> findByUserEmail(String email);
 }
