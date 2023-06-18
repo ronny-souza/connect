@@ -1,7 +1,6 @@
 package br.com.connect.service;
 
 import br.com.connect.exception.UnauthenticatedUserException;
-import br.com.connect.exception.UserNotFoundException;
 import br.com.connect.model.User;
 import br.com.connect.model.transport.user.UserDTO;
 import br.com.connect.repository.UserRepository;
@@ -19,7 +18,7 @@ public class UserSessionService {
         this.userRepository = userRepository;
     }
 
-    public UserDTO getUserInSession() throws UserNotFoundException {
+    public UserDTO getUserInSession() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             String email = authentication.getName();
