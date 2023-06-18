@@ -43,6 +43,7 @@ public class User implements UserDetails {
     @Column(nullable = false, columnDefinition = "tinyint DEFAULT 0")
     private boolean enabled;
 
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     public User(CreateUserDTO createUserDTO, String passwordEncoded) {

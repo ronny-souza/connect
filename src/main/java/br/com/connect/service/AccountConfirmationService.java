@@ -33,7 +33,7 @@ public class AccountConfirmationService {
     }
 
     @Transactional
-    public void confirmAccount(ConfirmAccountDTO confirmAccountDTO) throws ConfirmationCodeNotFoundException {
+    public void confirmAccount(ConfirmAccountDTO confirmAccountDTO) throws ConfirmationCodeExpiredException {
         LOGGER.info("Validating confirmation code...");
         Optional<AccountConfirmation> optionalAccountConfirmation = this.accountConfirmationRepository.findByCodeAndUserEmail(confirmAccountDTO.code(), confirmAccountDTO.email());
         if (optionalAccountConfirmation.isEmpty()) {
@@ -42,9 +42,16 @@ public class AccountConfirmationService {
 
         AccountConfirmation accountConfirmation = optionalAccountConfirmation.get();
         if (accountConfirmation.getExpirationDate().isBefore(LocalDateTime.now())) {
+            this.accountConfirmationRepository.delete(accountConfirmation);
             throw new ConfirmationCodeExpiredException("The confirmation code has expired. Request a new code to try again");
         }
 
         this.accountConfirmationRepository.delete(accountConfirmation);
+    }
+
+    @Transactional
+    public void deleteCodeIfExists(String email) {
+        Optional<AccountConfirmation> optionalAccountConfirmation = this.accountConfirmationRepository.findByUserEmail(email);
+        optionalAccountConfirmation.ifPresent(this.accountConfirmationRepository::delete);
     }
 }
