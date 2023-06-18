@@ -1,6 +1,7 @@
 package br.com.connect.model;
 
 import br.com.connect.model.transport.user.CreateUserDTO;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
