@@ -1,11 +1,14 @@
 package br.com.connect.service;
 
+import br.com.connect.exception.CondominiumNotFoundException;
+import br.com.connect.exception.ConfirmationCodeExpiredException;
 import br.com.connect.exception.UserNotFoundException;
 import br.com.connect.model.Condominium;
 import br.com.connect.model.User;
 import br.com.connect.model.enums.MailTypeEnum;
 import br.com.connect.model.transport.condominium.CondominiumDTO;
 import br.com.connect.model.transport.condominium.CreateCondominiumDTO;
+import br.com.connect.model.transport.user.ConfirmEmailDTO;
 import br.com.connect.model.transport.user.UserDTO;
 import br.com.connect.repository.CondominiumRepository;
 import org.slf4j.Logger;
@@ -15,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class CondominiumService {
@@ -24,13 +28,13 @@ public class CondominiumService {
     private final CondominiumRepository condominiumRepository;
 
     private final UserService userService;
-    private final AccountConfirmationService accountConfirmationService;
+    private final IdentityConfirmationService identityConfirmationService;
     private final MailService mailService;
 
-    public CondominiumService(CondominiumRepository condominiumRepository, UserService userService, AccountConfirmationService accountConfirmationService, MailService mailService) {
+    public CondominiumService(CondominiumRepository condominiumRepository, UserService userService, IdentityConfirmationService identityConfirmationService, MailService mailService) {
         this.condominiumRepository = condominiumRepository;
         this.userService = userService;
-        this.accountConfirmationService = accountConfirmationService;
+        this.identityConfirmationService = identityConfirmationService;
         this.mailService = mailService;
     }
 
@@ -43,21 +47,47 @@ public class CondominiumService {
         this.condominiumRepository.save(condominium);
 
         if (createCondominiumDTO.email() != null) {
-            this.publishConfirmationEmailMessage(createCondominiumDTO.email(), user);
+            this.publishConfirmationEmailMessage(createCondominiumDTO.name(), createCondominiumDTO.email(), user);
         }
 
         return new CondominiumDTO(condominium);
     }
 
-    private void publishConfirmationEmailMessage(String email, User user) {
+    @Transactional
+    public void confirmEmail(ConfirmEmailDTO confirmEmailDTO) throws ConfirmationCodeExpiredException, CondominiumNotFoundException {
+        this.identityConfirmationService.confirmEmail(confirmEmailDTO);
+
+        Optional<Condominium> optionalCondominium = this.condominiumRepository.findByEmail(confirmEmailDTO.email());
+        if (optionalCondominium.isEmpty()) {
+            throw new CondominiumNotFoundException(String.format("Condominium with email: %s is not found", confirmEmailDTO.email()));
+        }
+        Condominium condominium = optionalCondominium.get();
+        condominium.activateEmail();
+        this.condominiumRepository.save(condominium);
+    }
+
+    public void regenerateConfirmationCode(String email, UserDTO userInSession) throws CondominiumNotFoundException {
+        Optional<Condominium> optionalCondominium = this.condominiumRepository.findByEmailAndUserConnectIdentifier(email, userInSession.connectIdentifier());
+        if (optionalCondominium.isEmpty()) {
+            throw new CondominiumNotFoundException("Condominium was not found or user is not the owner");
+        }
+
+        Condominium condominium = optionalCondominium.get();
+        this.identityConfirmationService.deleteCodeIfExists(email);
+        LOGGER.info("Generating new confirmation code...");
+        this.publishConfirmationEmailMessage(condominium.getName(), email, condominium.getUser());
+    }
+
+    private void publishConfirmationEmailMessage(String condominiumName, String email, User user) {
         String subject = "Connect - Confirmação de e-mail do condomínio";
         MailTypeEnum type = MailTypeEnum.CONFIRM_CONDOMINIUM_EMAIL;
 
-        String code = this.accountConfirmationService.createConfirmationCode(email, user);
+        String code = this.identityConfirmationService.createConfirmationCode(email, user);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("username", user.getName());
         properties.put("code", code);
-        this.mailService.buildAndpublish(null, user.getEmail(), subject, type, properties);
+        properties.put("condominium", condominiumName);
+        this.mailService.buildAndpublish(null, email, subject, type, properties);
     }
 }

@@ -1,9 +1,6 @@
 package br.com.connect.controller;
 
-import br.com.connect.exception.ConfirmationCodeExpiredException;
-import br.com.connect.exception.ConfirmationCodeNotFoundException;
-import br.com.connect.exception.UnauthenticatedUserException;
-import br.com.connect.exception.UserAlreadyExistsException;
+import br.com.connect.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,4 +28,15 @@ public class ControllerExceptionHandler {
     public ResponseEntity<String> handleUnauthenticatedUserException(UnauthenticatedUserException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleUserNotFoundException(UserNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CondominiumNotFoundException.class)
+    public ResponseEntity<String> handleCondominiumNotFoundException(CondominiumNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
 }

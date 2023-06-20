@@ -2,7 +2,7 @@ package br.com.connect.controller;
 
 import br.com.connect.exception.ConfirmationCodeExpiredException;
 import br.com.connect.exception.UserNotFoundException;
-import br.com.connect.model.transport.user.ConfirmAccountDTO;
+import br.com.connect.model.transport.user.ConfirmEmailDTO;
 import br.com.connect.model.transport.user.CreateUserDTO;
 import br.com.connect.model.transport.user.UserDTO;
 import br.com.connect.service.UserService;
@@ -33,8 +33,8 @@ public class UserController {
     }
 
     @PostMapping("/confirmation")
-    public ResponseEntity<Void> confirmAccount(@RequestBody @Valid ConfirmAccountDTO confirmAccountDTO) throws ConfirmationCodeExpiredException {
-        this.userService.confirmAccount(confirmAccountDTO);
+    public ResponseEntity<Void> confirmAccount(@RequestBody @Valid ConfirmEmailDTO confirmEmailDTO) throws ConfirmationCodeExpiredException {
+        this.userService.confirmAccount(confirmEmailDTO);
         return ResponseEntity.ok().build();
     }
 

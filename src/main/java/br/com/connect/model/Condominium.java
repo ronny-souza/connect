@@ -32,6 +32,9 @@ public class Condominium {
     @Column(nullable = false)
     private String email;
 
+    @Column(columnDefinition = "TINYINT DEFAULT 0")
+    private boolean emailActivated;
+
     @Embedded
     private Address address;
 
@@ -43,8 +46,13 @@ public class Condominium {
         this.connectIdentifier = UUID.randomUUID().toString();
         this.name = createCondominiumDTO.name();
         this.email = createCondominiumDTO.email() != null ? createCondominiumDTO.email() : user.getEmail();
+        this.emailActivated = createCondominiumDTO.email() == null;
         this.phone = createCondominiumDTO.phone() != null ? createCondominiumDTO.phone() : user.getPhone();
         this.address = new Address(createCondominiumDTO.address());
         this.user = user;
+    }
+
+    public void activateEmail() {
+        this.emailActivated = true;
     }
 }
