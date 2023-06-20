@@ -5,7 +5,7 @@ import br.com.connect.exception.UserAlreadyExistsException;
 import br.com.connect.exception.UserNotFoundException;
 import br.com.connect.model.User;
 import br.com.connect.model.enums.MailTypeEnum;
-import br.com.connect.model.transport.user.ConfirmAccountDTO;
+import br.com.connect.model.transport.user.ConfirmEmailDTO;
 import br.com.connect.model.transport.user.CreateUserDTO;
 import br.com.connect.model.transport.user.UserDTO;
 import br.com.connect.repository.UserRepository;
@@ -32,13 +32,13 @@ public class UserService implements UserDetailsService {
 
     private final MailService mailService;
 
-    private final AccountConfirmationService accountConfirmationService;
+    private final IdentityConfirmationService identityConfirmationService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, MailService mailService, AccountConfirmationService accountConfirmationService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, MailService mailService, IdentityConfirmationService identityConfirmationService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.mailService = mailService;
-        this.accountConfirmationService = accountConfirmationService;
+        this.identityConfirmationService = identityConfirmationService;
     }
 
     @Override
@@ -71,7 +71,7 @@ public class UserService implements UserDetailsService {
             throw new UserNotFoundException("No user registered with this email was found");
         }
 
-        this.accountConfirmationService.deleteCodeIfExists(email);
+        this.identityConfirmationService.deleteCodeIfExists(email);
         LOGGER.info("Generating new confirmation code...");
         this.publishConfirmationAccountMessage(user);
     }
@@ -80,7 +80,7 @@ public class UserService implements UserDetailsService {
         String subject = "Connect - Confirmação de conta";
         MailTypeEnum type = MailTypeEnum.CONFIRM_ACCOUNT;
 
-        String code = this.accountConfirmationService.createConfirmationCode(null, user);
+        String code = this.identityConfirmationService.createConfirmationCode(null, user);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("username", user.getName());
@@ -89,10 +89,10 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void confirmAccount(ConfirmAccountDTO confirmAccountDTO) throws ConfirmationCodeExpiredException {
-        this.accountConfirmationService.confirmAccount(confirmAccountDTO);
+    public void confirmAccount(ConfirmEmailDTO confirmEmailDTO) throws ConfirmationCodeExpiredException {
+        this.identityConfirmationService.confirmAccount(confirmEmailDTO);
 
-        User user = this.userRepository.findByEmail(confirmAccountDTO.email());
+        User user = this.userRepository.findByEmail(confirmEmailDTO.email());
         user.enable();
         this.userRepository.save(user);
     }

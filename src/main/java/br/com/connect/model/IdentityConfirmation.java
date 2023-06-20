@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "accountConfirmation")
+@Table(name = "identityConfirmation")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccountConfirmation {
+public class IdentityConfirmation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +35,7 @@ public class AccountConfirmation {
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
-    public AccountConfirmation(String email, User user) {
+    public IdentityConfirmation(String email, User user) {
         this.code = RandomFactory.instance().code();
         this.email = email;
         this.connectIdentifier = UUID.randomUUID().toString();
