@@ -29,7 +29,7 @@ public class Condominium {
     @Column(nullable = false)
     private String phone;
 
-    @Column(nullable = false)
+    @Column(unique = true)
     private String email;
 
     @Column(columnDefinition = "TINYINT DEFAULT 0")
@@ -45,7 +45,7 @@ public class Condominium {
     public Condominium(CreateCondominiumDTO createCondominiumDTO, User user) {
         this.connectIdentifier = UUID.randomUUID().toString();
         this.name = createCondominiumDTO.name();
-        this.email = createCondominiumDTO.email() != null ? createCondominiumDTO.email() : user.getEmail();
+        this.email = createCondominiumDTO.email();
         this.emailActivated = createCondominiumDTO.email() == null;
         this.phone = createCondominiumDTO.phone() != null ? createCondominiumDTO.phone() : user.getPhone();
         this.address = new Address(createCondominiumDTO.address());
