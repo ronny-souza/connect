@@ -12,4 +12,8 @@ public interface CondominiumRepository extends JpaRepository<Condominium, Long> 
     Optional<Condominium> findByEmail(String email);
 
     Optional<Condominium> findByEmailAndUserConnectIdentifier(String email, String connectIdentifier);
+
+    Optional<Condominium> findByConnectIdentifierAndUserConnectIdentifierAndUserEnabledTrue(String connectIdentifier, String userConnectIdentifier);
+
+    boolean existsByEmail(String email);
 }

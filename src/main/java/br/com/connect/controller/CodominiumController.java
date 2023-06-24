@@ -1,8 +1,6 @@
 package br.com.connect.controller;
 
-import br.com.connect.exception.CondominiumNotFoundException;
-import br.com.connect.exception.ConfirmationCodeExpiredException;
-import br.com.connect.exception.UserNotFoundException;
+import br.com.connect.exception.*;
 import br.com.connect.model.transport.condominium.CondominiumDTO;
 import br.com.connect.model.transport.condominium.CreateCondominiumDTO;
 import br.com.connect.model.transport.user.ConfirmEmailDTO;
@@ -12,10 +10,8 @@ import br.com.connect.service.UserSessionService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 
@@ -33,7 +29,7 @@ public class CodominiumController {
     }
 
     @PostMapping
-    public ResponseEntity<CondominiumDTO> create(@RequestBody @Valid CreateCondominiumDTO createCondominiumDTO) throws UserNotFoundException {
+    public ResponseEntity<CondominiumDTO> create(@RequestBody @Valid CreateCondominiumDTO createCondominiumDTO) throws UserNotFoundException, CondominiumEmailAlreadyRegisteredException {
         UserDTO userInSession = this.userSessionService.getUserInSession();
         CondominiumDTO response = this.condominiumService.create(createCondominiumDTO, userInSession);
         return ResponseEntity.created(URI.create("/condominium")).body(response);
@@ -49,6 +45,13 @@ public class CodominiumController {
     public ResponseEntity<Void> resendEmailConfirmationCode(@RequestBody String email) throws UserNotFoundException, CondominiumNotFoundException {
         UserDTO userInSession = this.userSessionService.getUserInSession();
         this.condominiumService.regenerateConfirmationCode(email, userInSession);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/{condominiumUUID}/tenant")
+    public ResponseEntity<Void> insertTenants(@PathVariable("condominiumUUID") final String condominiumUUID, @RequestParam("tenants") MultipartFile tenantsAsCsv) throws EmptyFileException, CondominiumNotFoundException, ImportTenantsException {
+        UserDTO userInSession = this.userSessionService.getUserInSession();
+        this.condominiumService.registerTenants(tenantsAsCsv, condominiumUUID, userInSession);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

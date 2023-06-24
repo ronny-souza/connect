@@ -39,4 +39,18 @@ public class ControllerExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
 
+    @ExceptionHandler(EmptyFileException.class)
+    public ResponseEntity<String> handleEmptyFileException(EmptyFileException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ImportTenantsException.class)
+    public ResponseEntity<String> handleImportTenantsException(ImportTenantsException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CondominiumEmailAlreadyRegisteredException.class)
+    public ResponseEntity<String> handleCondominiumEmailAlreadyRegisteredException(CondominiumEmailAlreadyRegisteredException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
 }
