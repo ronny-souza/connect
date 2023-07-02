@@ -53,7 +53,7 @@ public class Tenant {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "condominium_id")
+    @JoinColumn(name = "condominium_id", nullable = false)
     private Condominium condominium;
 
     public Tenant(CreateTenantDTO createTenantDTO, Condominium condominium) {

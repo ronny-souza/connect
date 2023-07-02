@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -41,6 +43,9 @@ public class Condominium {
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "condominium", cascade = {CascadeType.ALL}, orphanRemoval = true)
+    private List<Tenant> tenants = new ArrayList<>();
 
     public Condominium(CreateCondominiumDTO createCondominiumDTO, User user) {
         this.connectIdentifier = UUID.randomUUID().toString();
